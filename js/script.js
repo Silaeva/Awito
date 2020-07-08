@@ -6,6 +6,12 @@ const closeBtnAdd = modalAdd.querySelector(".modal__close");
 const submitBtnAdd = modalAdd.querySelector(".modal__btn-submit");
 const formAdd = modalAdd.querySelector(".modal__submit");
 
+const catalog = document.querySelector(".catalog");
+const modalItem = document.querySelector(".modal__item");
+const closeBtnItem = modalItem.querySelector(".modal__close");
+
+// modalAdd
+
 addAd.addEventListener("click", () => {
   modalAdd.classList.remove("hide");
   submitBtnAdd.disabled = true;
@@ -33,9 +39,7 @@ document.addEventListener("keydown", (evt) => {
   }
 });
 
-const catalog = document.querySelector(".catalog");
-const modalItem = document.querySelector(".modal__item");
-const closeBtnItem = modalItem.querySelector(".modal__close");
+//modalItem
 
 catalog.addEventListener("click", (evt) => {
   if (evt.target.closest(".card")) {
