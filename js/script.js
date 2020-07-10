@@ -135,26 +135,16 @@ const addPhotoChangeHandler = (evt) => {
 
 // заполняем большую карточку товара данными из dataBase
 const fillBigAddWithData = (evt) => {
-  let cardId = evt.target.parentElement.dataset.id;
-  if (!cardId) {
-    cardId = target.parentElement.parentElement.dataset.id;
-  }
+  let card = evt.target.closest(".card");
 
-  if (evt.target.closest(".card")) {
-    modalItem.querySelector(".modal__image-item").src =
-      "data:image/jpeg;base64," + dataBase[cardId].image;
-    modalItem.querySelector(".modal__header-item").textContent =
-      dataBase[cardId].nameItem;
-    if (dataBase[cardId].status === "old") {
-      modalItem.querySelector(".modal__status-item").textContent = "б/у";
-    } else {
-      modalItem.querySelector(".modal__status-item").textContent = "отличное";
-    }
+  if (card) {
+    let item = dataBase[card.dataset.id];
 
-    modalItem.querySelector(".modal__description-item").textContent =
-      dataBase[cardId].descriptionItem;
-    modalItem.querySelector(".modal__cost-item").textContent =
-      dataBase[cardId].costItem + " ₽";
+    modalItem.querySelector(".modal__image-item").src = `data:image/jpeg;base64,${item.image}`;
+    modalItem.querySelector(".modal__header-item").textContent = item.nameItem;
+    modalItem.querySelector(".modal__status-item").textContent = item.status === "new" ? "Новый" : "Б/У";
+    modalItem.querySelector(".modal__description-item").textContent = item.descriptionItem;
+    modalItem.querySelector(".modal__cost-item").textContent = item.costItem + " ₽";
   }
 };
 
@@ -178,3 +168,7 @@ modalItem.addEventListener("click", (evt) => {
     closeModalItem();
   }
 });
+
+// search
+
+const searchInput = document.querySelector(".search__input");
