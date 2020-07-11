@@ -17,6 +17,8 @@ const modalBtnWarning = modalAdd.querySelector(".modal__btn-warning");
 
 const dataBase = JSON.parse(localStorage.getItem("awito")) || []; // получаем из локала строку и переводим сразу в объект. Если в сторадже null тогда получаем пустой массив куда можно запушить
 
+let currDB = dataBase;
+
 const saveDataBase = () =>
   localStorage.setItem("awito", JSON.stringify(dataBase)); // переводим в строку
 
@@ -27,6 +29,30 @@ const textFileBtn = modalFileBtn.textContent;
 const srcModalImage = modalImageAdd.src;
 
 const photoInfo = {};
+
+// Add Photo
+
+const addPhotoChangeHandler = (evt) => {
+  const reader = new FileReader();
+
+  const file = evt.target.files[0];
+
+  photoInfo.name = file.name;
+  photoInfo.size = file.size;
+
+  reader.readAsBinaryString(file);
+
+  reader.addEventListener("load", (evt) => {
+    if (photoInfo.size < 200000) {
+      modalFileBtn.textContent = photoInfo.name;
+      photoInfo.base64 = btoa(event.target.result);
+      modalImageAdd.src = `data:image/jpeg;base64,${photoInfo.base64}`;
+    } else {
+      modalFileBtn.textContent = "Воу воу! Не больше 200кб";
+      modalFileInput.value = "";
+    }
+  });
+};
 
 // modalAdd
 
@@ -74,9 +100,10 @@ const formInputHandler = () => {
 
 const formSubmitHandler = (evt) => {
   evt.preventDefault();
-  let itemObj = {};
+	let itemObj = {};
+
   for (const elem of modalInputElements) {
-    itemObj[elem.name] = elem.value;
+		itemObj[elem.name] = elem.value;
   }
   itemObj.image = photoInfo.base64;
   dataBase.push(itemObj);
@@ -87,9 +114,10 @@ const formSubmitHandler = (evt) => {
 
 // render
 
-const renderCard = () => {
-  catalog.textContent = "";
-  dataBase.forEach((item, i) => {
+const renderCard = (db = dataBase) => {
+	catalog.textContent = "";
+	currDB = db;
+  db.forEach((item, i) => {
     catalog.insertAdjacentHTML(
       "beforeend",
       `
@@ -107,40 +135,18 @@ const renderCard = () => {
 
 renderCard();
 
-// Add Photo
-
-const addPhotoChangeHandler = (evt) => {
-  const reader = new FileReader();
-
-  const file = evt.target.files[0];
-
-  photoInfo.name = file.name;
-  photoInfo.size = file.size;
-
-  reader.readAsBinaryString(file);
-
-  reader.addEventListener("load", (evt) => {
-    if (photoInfo.size < 200000) {
-      modalFileBtn.textContent = photoInfo.name;
-      photoInfo.base64 = btoa(event.target.result);
-      modalImageAdd.src = `data:image/jpeg;base64,${photoInfo.base64}`;
-    } else {
-      modalFileBtn.textContent = "Воу воу! Не больше 200кб";
-      modalFileInput.value = "";
-    }
-  });
-};
-
 //modalItem
 
 // заполняем большую карточку товара данными из dataBase
 const fillBigAddWithData = (evt) => {
   let card = evt.target.closest(".card");
+console.log(card);
 
   if (card) {
-    let item = dataBase[card.dataset.id];
+		const item = currDB[card.dataset.id];
+		
 
-    modalItem.querySelector(".modal__image-item").src = `data:image/jpeg;base64,${item.image}`;
+		modalItem.querySelector(".modal__image-item").src = `data:image/jpeg;base64,${item.image}`;
     modalItem.querySelector(".modal__header-item").textContent = item.nameItem;
     modalItem.querySelector(".modal__status-item").textContent = item.status === "new" ? "Новый" : "Б/У";
     modalItem.querySelector(".modal__description-item").textContent = item.descriptionItem;
@@ -172,3 +178,30 @@ modalItem.addEventListener("click", (evt) => {
 // search
 
 const searchInput = document.querySelector(".search__input");
+
+const searchInputHandler = () => {
+	const searchValue = searchInput.value.trim().toLowerCase();
+	
+	if (searchValue.length > 2) {
+		const result = dataBase.filter(item => item.nameItem.toLowerCase().includes(searchValue) || 
+																					 item.descriptionItem.toLowerCase().includes(searchValue));
+		renderCard(result);
+		
+	}
+};
+
+searchInput.addEventListener("input", searchInputHandler);
+
+// filter/nav
+
+const menuContainer = document.querySelector(".menu__container");
+
+const menuClickHandler = (evt) => {
+	if (evt.target.tagName === "A") {
+		const result = dataBase.filter(item => item.category === evt.target.dataset.category);
+		renderCard(result);
+	} 
+}
+
+menuContainer.addEventListener("click", menuClickHandler);
+
